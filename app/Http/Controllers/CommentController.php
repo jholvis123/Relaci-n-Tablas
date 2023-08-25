@@ -3,15 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Models\Post;
+use App\Models\Comment;
 
 class CommentController extends Controller
 {
+    //funciones de comments
+    
     public function ObtenerComentario(Request $request)
     {
-        $comments = Post::find(1)->comments;
-  
-        dd($comments);
+        
+
+        $post = Post::find(1); 
+        $comments = $post->comments;
+
+        return view('comentarios', ['post' => $post, 'comments' => $comments]);
+
+
     }
+    public function ActualizarComentario(Request $request, $commentId)
+    {
+        $comment = Comment::find($commentId);
+    
+        if ($comment) {
+            $comment->comment = $request->input('edited_comment');
+            $comment->save();
+    
+            return redirect()->back()->with('success', 'Comentario actualizado exitosamente.');
+        } else {
+            return redirect()->back()->with('error', 'El comentario no pudo ser encontrado.');
+        }
+    }
+    
 
     public function ObtenerPost(Request $request)
     {
@@ -30,18 +54,7 @@ class CommentController extends Controller
         $post = $post->comments()->save($comment);
     }
 
-    public function AgregarComentario(Request $request)
-    {
-        $post = Post::find(1);
-   
-        $comment1 = new Comment;
-        $comment1->comment = "Hi ItSolutionStuff.com Comment 1";
-           
-        $comment2 = new Comment;
-        $comment2->comment = "Hi ItSolutionStuff.com Comment 2";
-           
-        $post = $post->comments()->saveMany([$comment1, $comment2]);
-    }
+    
     public function Asociar(Request $request)
     {
         $comment = Comment::find(1);
@@ -49,4 +62,5 @@ class CommentController extends Controller
            
         $comment->post()->associate($post)->save();
     }
+
 }
